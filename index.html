@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>栈知 Gitnote — 本地优先的 Markdown 笔记</title>
+  <meta name="description" content="Gitnote 是一款本地优先的 Markdown 笔记应用，支持块编辑器和 GitHub 同步。你的数据，你做主。">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --text: #1d1d1f;
+      --text-secondary: #86868b;
+      --bg: #fbfbfd;
+      --surface: #ffffff;
+      --border: #d2d2d7;
+      --blue: #0071e3;
+      --blue-hover: #0077ED;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --text: #f5f5f7;
+        --text-secondary: #86868b;
+        --bg: #000000;
+        --surface: #1d1d1f;
+        --border: #424245;
+        --blue: #2997ff;
+        --blue-hover: #4fb4ff;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { color: var(--blue-hover); text-decoration: underline; }
+
+    /* Nav */
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(251, 251, 253, 0.72);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+    }
+    @media (prefers-color-scheme: dark) {
+      nav { background: rgba(0, 0, 0, 0.72); }
+    }
+    nav .nav-inner {
+      max-width: 980px;
+      width: 100%;
+      padding: 0 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    nav .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    nav .logo img { width: 20px; height: 20px; }
+    nav a.download-btn {
+      font-size: 12px;
+      color: #fff;
+      background: var(--blue);
+      padding: 6px 16px;
+      border-radius: 980px;
+      transition: background 0.2s;
+    }
+    nav a.download-btn:hover { background: var(--blue-hover); text-decoration: none; }
+
+    /* Hero */
+    .hero {
+      padding: 160px 22px 80px;
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .hero h1 {
+      font-size: clamp(40px, 8vw, 64px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.08;
+      margin-bottom: 16px;
+    }
+    .hero .subtitle {
+      font-size: clamp(18px, 3vw, 24px);
+      color: var(--text-secondary);
+      font-weight: 400;
+      margin-bottom: 32px;
+    }
+    .hero .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 17px;
+      font-weight: 500;
+      color: #fff;
+      background: var(--blue);
+      padding: 14px 28px;
+      border-radius: 980px;
+      transition: background 0.2s;
+    }
+    .hero .cta:hover { background: var(--blue-hover); text-decoration: none; }
+    .hero .note {
+      margin-top: 14px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    /* Features */
+    .features {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 40px 22px 80px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    @media (max-width: 768px) {
+      .features { grid-template-columns: 1fr; }
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px 28px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .feature-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 18px;
+    }
+    .feature-card h3 {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .feature-card p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Detail sections */
+    .detail {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 80px 22px;
+      display: flex;
+      align-items: center;
+      gap: 60px;
+    }
+    .detail.reverse { flex-direction: row-reverse; }
+    @media (max-width: 768px) {
+      .detail, .detail.reverse { flex-direction: column; text-align: center; }
+    }
+    .detail-text { flex: 1; }
+    .detail-text h2 {
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+    .detail-text p {
+      font-size: 17px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .detail-visual {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px;
+      text-align: center;
+    }
+    .detail-visual .code-block {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: left;
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      overflow-x: auto;
+    }
+    .detail-visual .code-block .comment { color: var(--text-secondary); }
+    .detail-visual .code-block .keyword { color: var(--blue); }
+    .detail-visual .code-block .string { color: #bf5040; }
+    .detail-visual .code-block .tag { color: #d2388e; }
+
+    /* Terminal mockup */
+    .terminal {
+      background: #1d1d1f;
+      border-radius: 12px;
+      overflow: hidden;
+      text-align: left;
+    }
+    .terminal-bar {
+      height: 32px;
+      background: #2d2d2f;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 6px;
+    }
+    .terminal-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .terminal-dot.r { background: #ff5f57; }
+    .terminal-dot.y { background: #febc2e; }
+    .terminal-dot.g { background: #28c840; }
+    .terminal-body {
+      padding: 16px 20px;
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      color: #e5e5e7;
+    }
+    .terminal-body .prompt { color: #28c840; }
+    .terminal-body .cmd { color: #f5f5f7; }
+    .terminal-body .out { color: #86868b; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 22px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    footer a { color: var(--text-secondary); }
+    footer a:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo">
+      <span>栈知 Gitnote</span>
+    </div>
+    <a class="download-btn" href="https://github.com/bainano/Gitnote/releases">下载</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <h1>你的笔记，<br>你做主。</h1>
+  <p class="subtitle">本地优先的 Markdown 笔记应用，用 Git 管理知识。</p>
+  <a class="cta" href="https://github.com/bainano/Gitnote/releases">下载 Gitnote</a>
+  <p class="note">免费开源 · 支持 Windows · macOS 支持中</p>
+</section>
+
+<section class="features">
+  <div class="feature-card">
+    <div class="feature-icon" style="background:#e8f0fe;">📝</div>
+    <h3>块编辑器</h3>
+    <p>每段内容独立可拖拽，输入 / 调出命令菜单，标题、代码块、待办清单一键插入。</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon" style="background:#fef3e0;">🔗</div>
+    <h3>GitHub 同步</h3>
+    <p>同步到你自己的 GitHub 仓库，不经过任何第三方服务器。双向同步，按时间戳处理冲突。</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon" style="background:#e8f5e9;">💾</div>
+    <h3>本地存储</h3>
+    <p>每篇笔记就是一个文件夹，Markdown + JSON，用任何编辑器都能打开。</p>
+  </div>
+</section>
+
+<section class="detail">
+  <div class="detail-text">
+    <h2>数据格式<br>一目了然</h2>
+    <p>笔记以文件夹形式存储，内容是标准 Markdown，元数据是 JSON。没有私有格式，没有加密锁，你的文件永远是你的。</p>
+  </div>
+  <div class="detail-visual">
+    <div class="code-block">
+      <span class="tag">note/</span><br>
+      &nbsp;&nbsp;<span class="string">我的笔记.md</span><br>
+      &nbsp;&nbsp;<span class="keyword">config.json</span><br>
+      &nbsp;&nbsp;<span class="tag">images/</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="string">img_0.png</span>
+    </div>
+  </div>
+</section>
+
+<section class="detail reverse">
+  <div class="detail-text">
+    <h2>同步<br>走你自己的路</h2>
+    <p>配置你的 GitHub 仓库，笔记推送到哪里、谁能看到，完全由你决定。支持批量同步和单篇同步。</p>
+  </div>
+  <div class="detail-visual">
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="terminal-dot r"></div>
+        <div class="terminal-dot y"></div>
+        <div class="terminal-dot g"></div>
+      </div>
+      <div class="terminal-body">
+        <span class="prompt">~/Gitnote $</span> <span class="cmd">npm run dist</span><br>
+        <span class="out">✓ built in 2.5s</span><br>
+        <span class="out">✓ packaging platform=win32 arch=x64</span><br>
+        <span class="out">✓ Gitnote Setup 1.0.2.exe</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="detail">
+  <div class="detail-text">
+    <h2>Markdown<br>原生体验</h2>
+    <p>所见即所得的块编辑器，也可以切换到纯源码模式。图片支持 Base64 嵌入或文件分离，导出时自由选择。</p>
+  </div>
+  <div class="detail-visual">
+    <div class="code-block">
+      <span class="comment"># 快速上手</span><br><br>
+      <span class="string">- [x]</span> 输入 <span class="keyword">/</span> 打开命令菜单<br>
+      <span class="string">- [x]</span> 拖拽段落调整顺序<br>
+      <span class="string">- [ ]</span> 连接 GitHub 开启同步<br><br>
+      <span class="comment">&gt; 栈知 = 栈 + 知</span><br>
+      <span class="comment">&gt; 知识如栈，层层积累。</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Copyright © 2026 Gitnote. 保留所有权利。</p>
+  <p style="margin-top: 6px;">
+    <a href="https://github.com/bainano/Gitnote">GitHub</a> · 
+    <a href="https://github.com/bainano/Gitnote/blob/main/LICENSE">MIT License</a>
+  </p>
+</footer>
+
+</body>
+</html>
