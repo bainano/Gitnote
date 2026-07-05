@@ -1,369 +1,764 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>栈知 Gitnote — 本地优先的 Markdown 笔记</title>
-  <meta name="description" content="Gitnote 是一款本地优先的 Markdown 笔记应用，支持块编辑器和 GitHub 同步。你的数据，你做主。">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gitnote — 你的笔记，你做主。</title>
+<meta name="description" content="本地优先的 Markdown 笔记。用 Git 管理知识，让每一条笔记都值得信赖。">
+<link rel="icon" type="image/x-icon" href="icon.ico">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+SC:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-ms-overflow-style:none;scrollbar-width:none}
+html::-webkit-scrollbar{display:none}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Noto Sans SC","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:#fff;color:#1d1d1f;line-height:1.5;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+}
+a{color:inherit;text-decoration:none}
 
-    :root {
-      --text: #1d1d1f;
-      --text-secondary: #86868b;
-      --bg: #fbfbfd;
-      --surface: #ffffff;
-      --border: #d2d2d7;
-      --blue: #0071e3;
-      --blue-hover: #0077ED;
-    }
+:root{
+  --blue:#007AFF;
+  --text:#1d1d1f;
+  --text2:#6e6e73;
+  --text3:#aeaeb2;
+  --bg:#f5f5f7;
+  --border:#d2d2d7;
+  --border2:#e8e8ed;
+}
 
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --text: #f5f5f7;
-        --text-secondary: #86868b;
-        --bg: #000000;
-        --surface: #1d1d1f;
-        --border: #424245;
-        --blue: #2997ff;
-        --blue-hover: #4fb4ff;
-      }
-    }
+/* ============================================
+   NAVIGATION — ultra thin, Apple style
+   ============================================ */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;height:48px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .3s ease;background:rgba(255,255,255,.8);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.nav.scrolled{border-bottom:1px solid var(--border2)}
+.nav-inner{max-width:1120px;width:100%;padding:0 32px;display:flex;
+  align-items:center;justify-content:space-between}
+.nav-logo{display:flex;align-items:center;gap:7px;font-weight:600;font-size:16px;
+  color:var(--text);letter-spacing:-.01em}
+.nav-logo img{width:24px;height:24px;border-radius:6px}
+.nav-links{display:flex;align-items:center;gap:24px;list-style:none}
+.nav-links a{font-size:13px;color:var(--text2);transition:color .15s;font-weight:400}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{background:var(--blue);color:#fff!important;padding:6px 14px;
+  border-radius:8px;font-weight:500;font-size:13px}
+.nav-cta:hover{opacity:.85}
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
-      color: var(--text);
-      background: var(--bg);
-      -webkit-font-smoothing: antialiased;
-      line-height: 1.5;
-    }
+/* ============================================
+   HERO — clean, massive type, minimal
+   ============================================ */
+.hero{padding:160px 24px 0;text-align:center;overflow:hidden}
+.hero-inner{max-width:820px;margin:0 auto}
+.hero-icon{width:80px;height:80px;border-radius:18px;margin:0 auto 36px;
+  display:block}
+.hero h1{font-size:clamp(52px,8.5vw,88px);font-weight:700;letter-spacing:-.04em;
+  line-height:1.04;margin-bottom:20px;color:var(--text)}
+.hero-sub{font-size:clamp(20px,2.6vw,26px);color:var(--text2);max-width:540px;
+  margin:0 auto 44px;line-height:1.55;font-weight:400}
+.hero-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn-primary{display:inline-flex;align-items:center;gap:7px;padding:14px 28px;
+  border-radius:980px;background:var(--blue);color:#fff;font-weight:500;font-size:16px;
+  border:none;cursor:pointer;transition:all .15s}
+.btn-primary:hover{opacity:.85}
+.btn-secondary{display:inline-flex;align-items:center;gap:7px;padding:14px 28px;
+  border-radius:980px;background:var(--bg);color:var(--text);font-weight:500;font-size:16px;
+  border:none;cursor:pointer;transition:all .15s}
+.btn-secondary:hover{background:var(--border2)}
+.hero-note{margin-top:24px;font-size:13px;color:var(--text3)}
+.hero-platforms{display:flex;gap:16px;justify-content:center;margin-top:16px;
+  font-size:12px;color:var(--text3)}
+.hero-platforms span{display:flex;align-items:center;gap:4px}
 
-    a { color: var(--blue); text-decoration: none; }
-    a:hover { color: var(--blue-hover); text-decoration: underline; }
+/* ============================================
+   DIVIDER — just whitespace
+   ============================================ */
+.section-gap{height:100px}
+.section-gap-lg{height:160px}
 
-    /* Nav */
-    nav {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(251, 251, 253, 0.72);
-      backdrop-filter: saturate(180%) blur(20px);
-      -webkit-backdrop-filter: saturate(180%) blur(20px);
-      border-bottom: 1px solid var(--border);
-      z-index: 100;
-    }
-    @media (prefers-color-scheme: dark) {
-      nav { background: rgba(0, 0, 0, 0.72); }
-    }
-    nav .nav-inner {
-      max-width: 980px;
-      width: 100%;
-      padding: 0 22px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    nav .logo {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-    }
-    nav .logo img { width: 20px; height: 20px; }
-    nav a.download-btn {
-      font-size: 12px;
-      color: #fff;
-      background: var(--blue);
-      padding: 6px 16px;
-      border-radius: 980px;
-      transition: background 0.2s;
-    }
-    nav a.download-btn:hover { background: var(--blue-hover); text-decoration: none; }
+/* ============================================
+   BENTO GRID — Apple style feature overview
+   ============================================ */
+.bento{max-width:1120px;margin:0 auto;padding:0 32px}
+.bento-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.bento-card{background:var(--bg);border-radius:24px;padding:48px 44px;
+  position:relative;overflow:hidden;min-height:380px;display:flex;flex-direction:column}
+.bento-card.wide{grid-column:span 2}
+.bento-card h3{font-size:32px;font-weight:700;letter-spacing:-.02em;margin-bottom:8px;
+  line-height:1.15}
+.bento-card .sub{font-size:17px;color:var(--text2);line-height:1.55;margin-bottom:32px}
+.bento-card .illust{flex:1;display:flex;align-items:flex-end;justify-content:center;
+  margin-top:auto}
 
-    /* Hero */
-    .hero {
-      padding: 160px 22px 80px;
-      text-align: center;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    .hero h1 {
-      font-size: clamp(40px, 8vw, 64px);
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      line-height: 1.08;
-      margin-bottom: 16px;
-    }
-    .hero .subtitle {
-      font-size: clamp(18px, 3vw, 24px);
-      color: var(--text-secondary);
-      font-weight: 400;
-      margin-bottom: 32px;
-    }
-    .hero .cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 17px;
-      font-weight: 500;
-      color: #fff;
-      background: var(--blue);
-      padding: 14px 28px;
-      border-radius: 980px;
-      transition: background 0.2s;
-    }
-    .hero .cta:hover { background: var(--blue-hover); text-decoration: none; }
-    .hero .note {
-      margin-top: 14px;
-      font-size: 14px;
-      color: var(--text-secondary);
-    }
+/* Card illustrations */
+.blocks-fig{display:flex;flex-direction:column;gap:8px;width:100%}
+.bf-row{display:flex;align-items:center;gap:8px}
+.bf-ico{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;
+  justify-content:center;flex-shrink:0}
+.bf-ico svg{width:16px;height:16px}
+.bf-lines{flex:1;display:flex;flex-direction:column;gap:4px}
+.bf-line{height:5px;border-radius:3px;background:#d1d1d6}
+.bf-line.w{width:85%}.bf-line.s{width:55%}.bf-line.m{width:70%}
 
-    /* Features */
-    .features {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 40px 22px 80px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-    }
-    @media (max-width: 768px) {
-      .features { grid-template-columns: 1fr; }
-    }
-    .feature-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 36px 28px;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .feature-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
-    }
-    .feature-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      margin-bottom: 18px;
-    }
-    .feature-card h3 {
-      font-size: 17px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-    .feature-card p {
-      font-size: 14px;
-      color: var(--text-secondary);
-      line-height: 1.6;
-    }
+.slash-fig{background:#fff;border-radius:12px;box-shadow:0 1px 8px rgba(0,0,0,.04);
+  border:1px solid var(--border2);padding:4px;width:220px;align-self:center}
+.sf-row{display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:7px;
+  font-size:12px;color:var(--text2)}
+.sf-row.on{background:rgba(0,122,255,.06)}
+.sf-row .ic{width:22px;height:22px;border-radius:5px;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sf-row.on .ic{background:rgba(0,122,255,.1)}
+.sf-row .lb{font-weight:500;color:var(--text)}
+.sf-row .ds{margin-left:auto;font-size:11px;color:var(--text3)}
 
-    /* Detail sections */
-    .detail {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 80px 22px;
-      display: flex;
-      align-items: center;
-      gap: 60px;
-    }
-    .detail.reverse { flex-direction: row-reverse; }
-    @media (max-width: 768px) {
-      .detail, .detail.reverse { flex-direction: column; text-align: center; }
-    }
-    .detail-text { flex: 1; }
-    .detail-text h2 {
-      font-size: clamp(28px, 4vw, 40px);
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      line-height: 1.1;
-      margin-bottom: 16px;
-    }
-    .detail-text p {
-      font-size: 17px;
-      color: var(--text-secondary);
-      line-height: 1.6;
-    }
-    .detail-visual {
-      flex: 1;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 40px;
-      text-align: center;
-    }
-    .detail-visual .code-block {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      text-align: left;
-      font-family: "SF Mono", "Fira Code", monospace;
-      font-size: 13px;
-      line-height: 1.8;
-      overflow-x: auto;
-    }
-    .detail-visual .code-block .comment { color: var(--text-secondary); }
-    .detail-visual .code-block .keyword { color: var(--blue); }
-    .detail-visual .code-block .string { color: #bf5040; }
-    .detail-visual .code-block .tag { color: #d2388e; }
+.md-fig{display:flex;flex-direction:column;gap:10px;width:100%}
+.mf-row{display:flex;align-items:center;gap:10px}
+.mf-in{flex:1;background:#fff;border:1px solid var(--border2);border-radius:7px;
+  padding:7px 10px;font-family:"SF Mono",Menlo,monospace;font-size:11px;color:var(--blue)}
+.mf-arr{color:var(--text3);font-size:13px;flex-shrink:0}
+.mf-out{flex:1;background:#fff;border:1px solid var(--border2);border-radius:7px;
+  padding:7px 10px;font-size:12px;color:var(--text)}
+.mf-out.b1{font-size:18px;font-weight:700}
+.mf-out.b2{font-size:14px;font-weight:600}
+.mf-out.q{border-left:3px solid var(--blue);padding-left:8px;font-style:italic;color:var(--text2)}
+.mf-out.td{display:flex;align-items:center;gap:5px}
+.mf-out.td .ck{width:12px;height:12px;border-radius:3px;border:1.5px solid var(--text3);flex-shrink:0}
 
-    /* Terminal mockup */
-    .terminal {
-      background: #1d1d1f;
-      border-radius: 12px;
-      overflow: hidden;
-      text-align: left;
-    }
-    .terminal-bar {
-      height: 32px;
-      background: #2d2d2f;
-      display: flex;
-      align-items: center;
-      padding: 0 12px;
-      gap: 6px;
-    }
-    .terminal-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
-    .terminal-dot.r { background: #ff5f57; }
-    .terminal-dot.y { background: #febc2e; }
-    .terminal-dot.g { background: #28c840; }
-    .terminal-body {
-      padding: 16px 20px;
-      font-family: "SF Mono", "Fira Code", monospace;
-      font-size: 13px;
-      line-height: 1.8;
-      color: #e5e5e7;
-    }
-    .terminal-body .prompt { color: #28c840; }
-    .terminal-body .cmd { color: #f5f5f7; }
-    .terminal-body .out { color: #86868b; }
+.theme-fig{display:flex;gap:12px;width:100%}
+.tmf{flex:1;border-radius:10px;overflow:hidden;border:1px solid var(--border2)}
+.tmf.lt{background:#fff}.tfm.dk{background:#1c1c1e}
+.tmf-h{padding:8px 10px;font-size:10px;font-weight:500;display:flex;align-items:center;gap:4px}
+.tmf.lt .tmf-h{color:var(--text);border-bottom:1px solid var(--border2)}
+.tmf.dk .tmf-h{color:#f5f5f7;border-bottom:1px solid rgba(255,255,255,.06)}
+.tmf-b{padding:10px}
+.tmf-bar{height:4px;border-radius:2px;margin-bottom:4px}
+.tmf.lt .tmf-bar{background:#e5e5ea}
+.tmf.dk .tmf-bar{background:#3a3a3c}
+.tmf-bar.s50{width:50%}.tmf-bar.s70{width:70%}
 
-    /* Footer */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 24px 22px;
-      text-align: center;
-      font-size: 12px;
-      color: var(--text-secondary);
-    }
-    footer a { color: var(--text-secondary); }
-    footer a:hover { color: var(--text); }
-  </style>
+.sync-fig{flex-direction:column;align-items:center;gap:16px}
+.sf-flow{display:flex;align-items:center;justify-content:center;gap:16px}
+.sf-node{background:#fff;border-radius:12px;padding:16px 12px;text-align:center;
+  width:100px;border:1px solid var(--border2)}
+.sf-node svg{margin:0 auto 6px;display:block;color:var(--blue)}
+.sf-node .nm{font-size:12px;font-weight:600;color:var(--text)}
+.sf-node .sb{font-size:10px;color:var(--text3);margin-top:1px}
+.sf-arr{width:24px;height:1.5px;background:var(--blue);border-radius:1px}
+.sf-status{display:flex;align-items:center;gap:6px;padding:8px 12px;
+  background:rgba(52,199,89,.06);border:1px solid rgba(52,199,89,.12);border-radius:7px;
+  font-size:12px;color:#34c759}
+.sf-status .dt{width:5px;height:5px;border-radius:50%;background:#34c759}
+
+.folder-fig{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}
+.ff-card{background:#fff;border:1px solid var(--border2);border-radius:9px;padding:14px 8px;
+  text-align:center}
+.ff-card svg{margin:0 auto 6px;display:block}
+.ff-card .nm{font-size:12px;font-weight:500;color:var(--text)}
+.ff-card .ct{font-size:10px;color:var(--text3);margin-top:1px}
+
+.i18n-fig{flex-direction:column;gap:12px;align-items:stretch}
+.i18n-sw{display:flex;background:var(--bg);border-radius:8px;padding:2px;
+  border:1px solid var(--border2)}
+.i18n-sw span{flex:1;padding:6px;text-align:center;border-radius:6px;
+  font-size:12px;font-weight:500;color:var(--text3);cursor:pointer}
+.i18n-sw span.on{background:#fff;color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.i18n-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.i18n-col{background:#fff;border:1px solid var(--border2);border-radius:8px;padding:12px}
+.i18n-col .tg{font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;
+  letter-spacing:.03em;margin-bottom:4px}
+.i18n-col .tx{font-size:12px;color:var(--text);line-height:1.5}
+
+.export-fig{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.ef-card{background:#fff;border:1px solid var(--border2);border-radius:10px;padding:18px;
+  text-align:center}
+.ef-card svg{margin:0 auto 8px;display:block;color:var(--blue)}
+.ef-card .nm{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
+.ef-card .ds{font-size:11px;color:var(--text3)}
+
+.platform-fig{display:flex;justify-content:center;gap:32px}
+.pf-item{text-align:center}
+.pf-item svg{margin:0 auto 8px;display:block;color:var(--text2)}
+.pf-item .nm{font-size:13px;font-weight:500;color:var(--text)}
+
+.storage-fig{width:100%}
+.ft-tree{background:#fff;border:1px solid var(--border2);border-radius:10px;padding:16px;
+  font-family:"SF Mono",Menlo,monospace;font-size:11px;line-height:2;color:var(--text2)}
+.ft-tree .dr{color:var(--blue)}.ft-tree .dm{color:var(--text3)}
+
+/* ============================================
+   PRODUCT DETAIL SECTIONS — Apple style
+   ============================================ */
+.detail{max-width:1120px;margin:0 auto;padding:0 32px}
+.detail-header{text-align:center;margin-bottom:72px}
+.detail-header h2{font-size:clamp(40px,5.5vw,60px);font-weight:700;letter-spacing:-.03em;
+  line-height:1.08;margin-bottom:12px}
+.detail-header p{font-size:21px;color:var(--text2);font-weight:400}
+.detail-row{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center;
+  margin-bottom:100px}
+.detail-row.r .dt-text{order:2}
+.detail-row.r .dt-visual{order:1}
+.dt-text h3{font-size:28px;font-weight:700;letter-spacing:-.01em;margin-bottom:12px}
+.dt-text p{font-size:16px;color:var(--text2);line-height:1.7;margin-bottom:20px}
+.dt-text ul{list-style:none;display:flex;flex-direction:column;gap:8px}
+.dt-text li{display:flex;align-items:flex-start;gap:7px;font-size:14px;color:var(--text2);line-height:1.5}
+.dt-text li svg{flex-shrink:0;margin-top:1px;color:var(--blue)}
+.dt-visual{background:var(--bg);border-radius:20px;padding:32px;min-height:280px;
+  display:flex;align-items:center;justify-content:center}
+
+/* ============================================
+   ARCHITECTURE
+   ============================================ */
+.arch{max-width:1120px;margin:0 auto;padding:0 32px}
+.arch-header{text-align:center;margin-bottom:56px}
+.arch-header h2{font-size:clamp(36px,5vw,52px);font-weight:700;letter-spacing:-.03em;margin-bottom:12px}
+.arch-header p{font-size:19px;color:var(--text2)}
+.arch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.arch-card{background:var(--bg);border-radius:18px;padding:28px;transition:transform .2s}
+.arch-card:hover{transform:translateY(-2px)}
+.arch-card svg{margin-bottom:12px;display:block;color:var(--blue)}
+.arch-card h4{font-size:15px;font-weight:600;margin-bottom:4px}
+.arch-card p{font-size:13px;color:var(--text2);line-height:1.55}
+
+/* ============================================
+   CTA
+   ============================================ */
+.cta{text-align:center;padding:120px 32px}
+.cta h2{font-size:clamp(40px,5.5vw,60px);font-weight:700;letter-spacing:-.03em;margin-bottom:16px}
+.cta p{font-size:19px;color:var(--text2);margin-bottom:40px;max-width:400px;
+  margin-left:auto;margin-right:auto}
+.cta-btns{display:flex;gap:12px;justify-content:center}
+
+/* ============================================
+   FOOTER — compact, Apple style
+   ============================================ */
+.footer{max-width:1120px;margin:0 auto;padding:32px 32px 40px;
+  border-top:1px solid var(--border2)}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;
+  padding-bottom:28px}
+.footer-brand .nm{font-size:15px;font-weight:600;display:flex;align-items:center;
+  gap:7px;margin-bottom:8px}
+.footer-brand .nm img{width:20px;height:20px;border-radius:5px}
+.footer-brand .ds{font-size:12px;color:var(--text2);line-height:1.5;max-width:260px}
+.footer-col h4{font-size:12px;font-weight:600;color:var(--text);margin-bottom:10px}
+.footer-col a{display:block;font-size:12px;color:var(--text2);margin-bottom:7px;transition:color .15s}
+.footer-col a:hover{color:var(--text)}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;
+  padding-top:16px;border-top:1px solid var(--border2);font-size:11px;color:var(--text3)}
+.footer-social a{width:28px;height:28px;border-radius:6px;background:var(--bg);
+  display:inline-flex;align-items:center;justify-content:center;transition:all .15s;
+  margin-left:6px}
+.footer-social a:hover{background:var(--border2)}
+
+/* ============================================
+   ANIMATIONS — subtle, Apple style
+   ============================================ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.hero-icon{animation:fadeUp .5s .05s both}
+.hero h1{animation:fadeUp .5s .12s both}
+.hero-sub{animation:fadeUp .5s .22s both}
+.hero-actions{animation:fadeUp .5s .32s both}
+.hero-note{animation:fadeUp .5s .42s both}
+.hero-platforms{animation:fadeUp .5s .5s both}
+.reveal{opacity:0;transform:translateY(24px);transition:all .6s cubic-bezier(.16,1,.3,1)}
+.reveal.on{opacity:1;transform:translateY(0)}
+.reveal-l{opacity:0;transform:translateX(-30px);transition:all .6s cubic-bezier(.16,1,.3,1)}
+.reveal-l.on{opacity:1;transform:translateX(0)}
+.reveal-r{opacity:0;transform:translateX(30px);transition:all .6s cubic-bezier(.16,1,.3,1)}
+.reveal-r.on{opacity:1;transform:translateX(0)}
+.scroll-bar{position:fixed;top:0;left:0;height:2px;background:var(--blue);z-index:200;
+  transition:width .05s}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media(max-width:768px){
+  .nav-links{display:none}
+  .bento-grid{grid-template-columns:1fr}
+  .bento-card.wide{grid-column:span 1}
+  .bento-card{min-height:300px;padding:36px 28px}
+  .detail-row{grid-template-columns:1fr;gap:40px}
+  .detail-row.r .dt-text{order:1}
+  .detail-row.r .dt-visual{order:2}
+  .arch-grid{grid-template-columns:1fr 1fr}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .folder-fig{grid-template-columns:1fr 1fr}
+  .theme-fig{flex-direction:column}
+  .i18n-pair{grid-template-columns:1fr}
+  .hero{padding:120px 24px 0}
+}
+</style>
 </head>
 <body>
 
-<nav>
+<div class="scroll-bar" id="scrollBar"></div>
+
+<!-- Nav -->
+<nav class="nav" id="nav">
   <div class="nav-inner">
-    <div class="logo">
-      <span>栈知 Gitnote</span>
-    </div>
-    <a class="download-btn" href="https://github.com/bainano/Gitnote/releases">下载</a>
+    <a href="#" class="nav-logo">
+      <img src="icon.svg" alt="Gitnote">
+      Gitnote
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">功能</a></li>
+      <li><a href="#detail">深入了解</a></li>
+      <li><a href="#download">下载</a></li>
+      <li><a href="https://github.com/bainano/Gitnote" target="_blank">GitHub</a></li>
+      <li><a href="#download" class="nav-cta">立即使用</a></li>
+    </ul>
   </div>
 </nav>
 
+<!-- Hero -->
 <section class="hero">
-  <h1>你的笔记，<br>你做主。</h1>
-  <p class="subtitle">本地优先的 Markdown 笔记应用，用 Git 管理知识。</p>
-  <a class="cta" href="https://github.com/bainano/Gitnote/releases">下载 Gitnote</a>
-  <p class="note">免费开源 · 支持 Windows · macOS 支持中</p>
-</section>
-
-<section class="features">
-  <div class="feature-card">
-    <div class="feature-icon" style="background:#e8f0fe;">📝</div>
-    <h3>块编辑器</h3>
-    <p>每段内容独立可拖拽，输入 / 调出命令菜单，标题、代码块、待办清单一键插入。</p>
-  </div>
-  <div class="feature-card">
-    <div class="feature-icon" style="background:#fef3e0;">🔗</div>
-    <h3>GitHub 同步</h3>
-    <p>同步到你自己的 GitHub 仓库，不经过任何第三方服务器。双向同步，按时间戳处理冲突。</p>
-  </div>
-  <div class="feature-card">
-    <div class="feature-icon" style="background:#e8f5e9;">💾</div>
-    <h3>本地存储</h3>
-    <p>每篇笔记就是一个文件夹，Markdown + JSON，用任何编辑器都能打开。</p>
-  </div>
-</section>
-
-<section class="detail">
-  <div class="detail-text">
-    <h2>数据格式<br>一目了然</h2>
-    <p>笔记以文件夹形式存储，内容是标准 Markdown，元数据是 JSON。没有私有格式，没有加密锁，你的文件永远是你的。</p>
-  </div>
-  <div class="detail-visual">
-    <div class="code-block">
-      <span class="tag">note/</span><br>
-      &nbsp;&nbsp;<span class="string">我的笔记.md</span><br>
-      &nbsp;&nbsp;<span class="keyword">config.json</span><br>
-      &nbsp;&nbsp;<span class="tag">images/</span><br>
-      &nbsp;&nbsp;&nbsp;&nbsp;<span class="string">img_0.png</span>
+  <div class="hero-inner">
+    <img src="icon.svg" alt="Gitnote" class="hero-icon" width="72" height="72">
+    <h1>你的笔记，你做主。</h1>
+    <p class="hero-sub">本地优先的 Markdown 笔记。用 Git 管理知识，让每一条笔记都值得信赖。</p>
+    <div class="hero-actions">
+      <a href="#download" class="btn-primary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        下载 Gitnote
+      </a>
+      <a href="https://github.com/bainano/Gitnote" target="_blank" class="btn-secondary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+        GitHub
+      </a>
+    </div>
+    <p class="hero-note">免费。开源。跨平台。</p>
+    <div class="hero-platforms">
+      <span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Windows
+      </span>
+      <span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+        macOS
+      </span>
+      <span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+        Linux
+      </span>
     </div>
   </div>
 </section>
 
-<section class="detail reverse">
-  <div class="detail-text">
-    <h2>同步<br>走你自己的路</h2>
-    <p>配置你的 GitHub 仓库，笔记推送到哪里、谁能看到，完全由你决定。支持批量同步和单篇同步。</p>
-  </div>
-  <div class="detail-visual">
-    <div class="terminal">
-      <div class="terminal-bar">
-        <div class="terminal-dot r"></div>
-        <div class="terminal-dot y"></div>
-        <div class="terminal-dot g"></div>
+<div class="section-gap-lg"></div>
+
+<!-- Bento Grid — Feature Overview -->
+<section id="features">
+  <div class="bento">
+    <div class="bento-grid">
+
+      <!-- Block Editor -->
+      <div class="bento-card reveal">
+        <h3>Block 编辑器</h3>
+        <p class="sub">每一段内容，都是一个独立的积木。自由拼搭，随心组合。</p>
+        <div class="illust">
+          <div class="blocks-fig">
+            <div class="bf-row">
+              <div class="bf-ico" style="background:rgba(0,122,255,.08)"><svg viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+              <div class="bf-lines"><div class="bf-line w"></div><div class="bf-line s"></div></div>
+            </div>
+            <div class="bf-row">
+              <div class="bf-ico" style="background:rgba(139,92,246,.08)"><svg viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg></div>
+              <div class="bf-lines"><div class="bf-line w" style="height:7px;background:#1d1d1f;border-radius:3px"></div></div>
+            </div>
+            <div class="bf-row">
+              <div class="bf-ico" style="background:rgba(52,199,89,.08)"><svg viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="9 11 12 14 22 4"/></svg></div>
+              <div class="bf-lines"><div class="bf-line m"></div></div>
+            </div>
+            <div class="bf-row">
+              <div class="bf-ico" style="background:rgba(255,149,0,.08)"><svg viewBox="0 0 24 24" fill="none" stroke="#FF9500" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+              <div class="bf-lines"><div class="bf-line s" style="background:#c7c7cc"></div><div class="bf-line w" style="background:#c7c7cc"></div></div>
+            </div>
+            <div class="bf-row">
+              <div class="bf-ico" style="background:rgba(255,59,48,.08)"><svg viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+              <div class="bf-lines"><div class="bf-line w" style="height:36px;background:linear-gradient(135deg,#e5e5ea,#d1d1d6);border-radius:5px"></div></div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="terminal-body">
-        <span class="prompt">~/Gitnote $</span> <span class="cmd">npm run dist</span><br>
-        <span class="out">✓ built in 2.5s</span><br>
-        <span class="out">✓ packaging platform=win32 arch=x64</span><br>
-        <span class="out">✓ Gitnote Setup 1.0.2.exe</span>
+
+      <!-- Slash Commands -->
+      <div class="bento-card reveal">
+        <h3>斜杠命令</h3>
+        <p class="sub">输入 <code style="font-family:monospace;background:var(--bg);padding:1px 5px;border-radius:4px;color:var(--blue);border:1px solid var(--border2)">/</code>，万物皆可达。</p>
+        <div class="illust">
+          <div class="slash-fig">
+            <div class="sf-row on">
+              <div class="ic"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+              <span class="lb">文本</span><span class="ds">Text</span>
+            </div>
+            <div class="sf-row">
+              <div class="ic"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6e6e73" stroke-width="2"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg></div>
+              <span class="lb">标题</span><span class="ds">H1 / H2 / H3</span>
+            </div>
+            <div class="sf-row">
+              <div class="ic"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6e6e73" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+              <span class="lb">列表</span><span class="ds">To-do / Bullet</span>
+            </div>
+            <div class="sf-row">
+              <div class="ic"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6e6e73" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+              <span class="lb">代码</span><span class="ds">Code</span>
+            </div>
+            <div class="sf-row">
+              <div class="ic"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6e6e73" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+              <span class="lb">图片</span><span class="ds">Image</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Markdown Shortcuts -->
+      <div class="bento-card reveal">
+        <h3>所写即所得。</h3>
+        <p class="sub">熟悉的 Markdown 语法，实时转换为精致的排版。</p>
+        <div class="illust">
+          <div class="md-fig">
+            <div class="mf-row">
+              <div class="mf-in"># 标题</div>
+              <div class="mf-arr">&rarr;</div>
+              <div class="mf-out b1">标题</div>
+            </div>
+            <div class="mf-row">
+              <div class="mf-in">## 二级</div>
+              <div class="mf-arr">&rarr;</div>
+              <div class="mf-out b2">二级</div>
+            </div>
+            <div class="mf-row">
+              <div class="mf-in">&gt; 引用</div>
+              <div class="mf-arr">&rarr;</div>
+              <div class="mf-out q">引用</div>
+            </div>
+            <div class="mf-row">
+              <div class="mf-in">- [ ] 任务</div>
+              <div class="mf-arr">&rarr;</div>
+              <div class="mf-out td"><div class="ck"></div>任务</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Theme -->
+      <div class="bento-card reveal">
+        <h3>暗一点，亮一点。<br>你说了算。</h3>
+        <p class="sub">浅色、深色、跟随系统。</p>
+        <div class="illust">
+          <div class="theme-fig">
+            <div class="tmf lt">
+              <div class="tmf-h"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg> 浅色</div>
+              <div class="tmf-b">
+                <div class="tmf-bar" style="width:36%;height:7px;background:#1d1d1f;border-radius:3px;margin-bottom:8px"></div>
+                <div class="tmf-bar"></div><div class="tmf-bar s70"></div>
+                <div class="tmf-bar s50"></div><div class="tmf-bar"></div>
+              </div>
+            </div>
+            <div class="tmf dk">
+              <div class="tmf-h"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> 深色</div>
+              <div class="tmf-b">
+                <div class="tmf-bar" style="width:36%;height:7px;background:#f5f5f7;border-radius:3px;margin-bottom:8px"></div>
+                <div class="tmf-bar"></div><div class="tmf-bar s70"></div>
+                <div class="tmf-bar s50"></div><div class="tmf-bar"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GitHub Sync -->
+      <div class="bento-card wide reveal">
+        <h3>GitHub 双向同步。</h3>
+        <p class="sub">你的知识，随身携带。通过 GitHub 在所有设备间无缝同步。</p>
+        <div class="illust sync-fig">
+          <div class="sf-flow">
+            <div class="sf-node">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              <div class="nm">本地笔记</div>
+              <div class="sb">Markdown + JSON</div>
+            </div>
+            <div class="sf-arr"></div>
+            <div class="sf-node">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+              <div class="nm">GitHub</div>
+              <div class="sb">远程仓库</div>
+            </div>
+            <div class="sf-arr"></div>
+            <div class="sf-node">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+              <div class="nm">其他设备</div>
+              <div class="sb">随时访问</div>
+            </div>
+          </div>
+          <div class="sf-status">
+            <div class="dt"></div>
+            同步完成
+          </div>
+        </div>
+      </div>
+
+      <!-- Folder System -->
+      <div class="bento-card reveal">
+        <h3>频道</h3>
+        <p class="sub">像文件夹一样组织笔记，但更灵活。</p>
+        <div class="illust">
+          <div class="folder-fig">
+            <div class="ff-card">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              <div class="nm">技术</div><div class="ct">5</div>
+            </div>
+            <div class="ff-card">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF9500" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              <div class="nm">读书</div><div class="ct">3</div>
+            </div>
+            <div class="ff-card">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div class="nm">灵感</div><div class="ct">2</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- i18n -->
+      <div class="bento-card reveal">
+        <h3>中文。English。</h3>
+        <p class="sub">100+ 个翻译键，每个细节都经过本地化。</p>
+        <div class="illust i18n-fig">
+          <div class="i18n-sw">
+            <span class="on">中文</span>
+            <span>English</span>
+          </div>
+          <div class="i18n-pair">
+            <div class="i18n-col">
+              <div class="tg">中文</div>
+              <div class="tx">本地优先的 Markdown 笔记，用 Git 管理你的知识。</div>
+            </div>
+            <div class="i18n-col">
+              <div class="tg">English</div>
+              <div class="tx">Local-first Markdown notes, manage your knowledge with Git.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Export -->
+      <div class="bento-card reveal">
+        <h3>导出。</h3>
+        <p class="sub">标准 Markdown。你的数据，永远属于你。</p>
+        <div class="illust">
+          <div class="export-fig">
+            <div class="ef-card">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <div class="nm">Base64</div>
+              <div class="ds">图片内嵌</div>
+            </div>
+            <div class="ef-card">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              <div class="nm">文件</div>
+              <div class="ds">图片分离</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-gap-lg"></div>
+
+<!-- Platform + Storage — gray section -->
+<section style="background:var(--bg)">
+  <div class="detail">
+    <div class="detail-header reveal" style="padding-top:100px;padding-bottom:20px">
+      <h2>随处可用。</h2>
+      <p>Windows。macOS。Linux。三个平台，一套体验。</p>
+    </div>
+    <div class="detail-row">
+      <div class="dt-text reveal-l">
+        <h3>你的系统，你的选择。</h3>
+        <p>基于 Electron 构建，为每个平台提供原生安装包。支持 Intel 和 Apple Silicon 芯片。</p>
+        <ul>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Windows — NSIS 安装包</li>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>macOS — DMG + ZIP</li>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Linux — 通用构建</li>
+        </ul>
+      </div>
+      <div class="dt-visual reveal-r">
+        <div class="platform-fig">
+          <div class="pf-item">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <div class="nm">Windows</div>
+          </div>
+          <div class="pf-item">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+            <div class="nm">macOS</div>
+          </div>
+          <div class="pf-item">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            <div class="nm">Linux</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-row r">
+      <div class="dt-text reveal-r">
+        <h3>你的数据，你掌控。</h3>
+        <p>所有笔记以纯 Markdown 格式存储在本地。不依赖任何服务器，不锁定在任何专有格式。</p>
+        <ul>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>每条笔记 = 一个独立文件夹</li>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>支持自定义存储路径</li>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>元数据索引自动重建</li>
+        </ul>
+      </div>
+      <div class="dt-visual reveal-l">
+        <div class="storage-fig">
+          <div class="ft-tree">
+            <span class="dr">notes/</span><br>
+            &nbsp;&nbsp;<span class="dr">a1b2c3d4/</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;config.json <span class="dm">// 元数据</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;Git最佳实践.md<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="dr">images/</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;img_0.png<br>
+            <span class="dr">&nbsp;&nbsp;e5f6g7h8/</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;config.json<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;React状态管理.md<br>
+            &nbsp;&nbsp;<span class="dr">notes-meta.json</span> <span class="dm">// 索引</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="detail">
-  <div class="detail-text">
-    <h2>Markdown<br>原生体验</h2>
-    <p>所见即所得的块编辑器，也可以切换到纯源码模式。图片支持 Base64 嵌入或文件分离，导出时自由选择。</p>
-  </div>
-  <div class="detail-visual">
-    <div class="code-block">
-      <span class="comment"># 快速上手</span><br><br>
-      <span class="string">- [x]</span> 输入 <span class="keyword">/</span> 打开命令菜单<br>
-      <span class="string">- [x]</span> 拖拽段落调整顺序<br>
-      <span class="string">- [ ]</span> 连接 GitHub 开启同步<br><br>
-      <span class="comment">&gt; 栈知 = 栈 + 知</span><br>
-      <span class="comment">&gt; 知识如栈，层层积累。</span>
+<!-- Architecture -->
+<section id="detail" style="padding:100px 0">
+  <div class="arch">
+    <div class="arch-header reveal">
+      <h2>内在同样出色。</h2>
+      <p>现代技术栈，为速度与可靠性而设计。</p>
+    </div>
+    <div class="arch-grid">
+      <div class="arch-card reveal">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+        <h4>React 18</h4>
+        <p>并发模式，自动批处理。流畅的编辑体验。</p>
+      </div>
+      <div class="arch-card reveal">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <h4>Electron 35</h4>
+        <p>原生性能与 Web 灵活性兼得。</p>
+      </div>
+      <div class="arch-card reveal">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        <h4>Tailwind CSS</h4>
+        <p>Apple 风格设计系统，一致的视觉体验。</p>
+      </div>
+      <div class="arch-card reveal">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        <h4>Zustand</h4>
+        <p>轻量状态管理，简洁高效。</p>
+      </div>
+      <div class="arch-card reveal">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        <h4>Vite 6</h4>
+        <p>闪电般的构建速度。</p>
+      </div>
+      <div class="arch-card reveal">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <h4>安全架构</h4>
+        <p>contextIsolation，进程间通信安全。</p>
+      </div>
     </div>
   </div>
 </section>
 
-<footer>
-  <p>Copyright © 2026 Gitnote. 保留所有权利。</p>
-  <p style="margin-top: 6px;">
-    <a href="https://github.com/bainano/Gitnote">GitHub</a> · 
-    <a href="https://github.com/bainano/Gitnote/blob/main/LICENSE">MIT License</a>
-  </p>
+<!-- CTA -->
+<section id="download" class="cta">
+  <h2 class="reveal">开始吧。</h2>
+  <p class="reveal">免费下载 Gitnote，用 Git 的方式管理你的知识。</p>
+  <div class="cta-btns reveal">
+    <a href="https://github.com/bainano/Gitnote/releases" target="_blank" class="btn-primary">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      下载 Gitnote
+    </a>
+    <a href="https://github.com/bainano/Gitnote" target="_blank" class="btn-secondary">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+      查看源码
+    </a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="nm">
+        <img src="icon.svg" alt="Gitnote" width="20" height="20">
+        Gitnote
+      </div>
+      <p class="ds">本地优先的 Markdown 笔记。开源、免费、跨平台。</p>
+    </div>
+    <div class="footer-col">
+      <h4>产品</h4>
+      <a href="#features">功能</a>
+      <a href="#download">下载</a>
+      <a href="https://txc.qq.com/products/801203/change-log" target="_blank">版本日志</a>
+    </div>
+    <div class="footer-col">
+      <h4>资源</h4>
+      <a href="https://github.com/bainano/Gitnote" target="_blank">GitHub</a>
+      <a href="https://txc.qq.com/products/801203" target="_blank">问题反馈</a>
+      <a href="https://github.com/bainano/Gitnote/blob/main/LICENSE" target="_blank">MIT License</a>
+    </div>
+    <div class="footer-col">
+      <h4>关于</h4>
+      <a href="https://github.com/bainano/Gitnote/graphs/contributors" target="_blank">贡献者</a>
+      <a href="https://txc.qq.com/products/801203/post/178327508164955721/" target="_blank">更新日志</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2025 Gitnote</span>
+    <div class="footer-social">
+      <a href="https://github.com/bainano/Gitnote" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#6e6e73"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+    </div>
+  </div>
 </footer>
 
+<div style="height:20px"></div>
+
+<script>
+// Scroll progress
+window.addEventListener('scroll',()=>{
+  const s=document.documentElement.scrollTop;
+  const h=document.documentElement.scrollHeight-document.documentElement.clientHeight;
+  document.getElementById('scrollBar').style.width=(s/h*100)+'%';
+});
+
+// Nav
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',window.scrollY>10));
+
+// Reveal
+const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('on')}),{threshold:.12,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.reveal,.reveal-l,.reveal-r').forEach(el=>obs.observe(el));
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',function(e){e.preventDefault();
+    const t=document.querySelector(this.getAttribute('href'));
+    if(t)t.scrollIntoView({behavior:'smooth',block:'start'})});
+});
+</script>
 </body>
 </html>
