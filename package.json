@@ -7,7 +7,7 @@
     "appId": "com.gitnote.app",
     "productName": "Gitnote",
     "directories": {
-      "output": "dist-v1.0.2"
+      "output": "release"
     },
     "files": [
       "dist/",
@@ -17,7 +17,27 @@
       "icon.ico"
     ],
     "win": {
-      "target": "nsis"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64", "ia32"]
+        }
+      ],
+      "icon": "icon.ico"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "icon": "icon.icns",
+      "category": "public.app-category.productivity"
     },
     "nsis": {
       "oneClick": false,
