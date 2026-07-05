@@ -29,9 +29,7 @@ jobs:
         run: npm run build
 
       - name: Build Windows (x64 + ia32)
-        run: npx electron-builder --win --x64 --ia32
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx electron-builder --win --x64 --ia32 --publish never
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
@@ -63,10 +61,9 @@ jobs:
         run: npm run build
 
       - name: Build macOS (x64 + arm64)
-        run: npx electron-builder --mac --x64 --arm64
+        run: npx electron-builder --mac --x64 --arm64 --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4
@@ -103,19 +100,15 @@ jobs:
           echo "Looking for changelog: $FILE"
           if [ -f "$FILE" ]; then
             echo "Found changelog file"
-            CONTENT=$(cat "$FILE")
-            {
-              echo "body<<CHANGELOG_EOF"
-              echo "$CONTENT"
-              echo "CHANGELOG_EOF"
-            } >> "$GITHUB_OUTPUT"
+            # Use delimiter approach to safely pass multiline content
+            echo "body<<CHANGELOG_EOF" >> "$GITHUB_OUTPUT"
+            cat "$FILE" >> "$GITHUB_OUTPUT"
+            echo "CHANGELOG_EOF" >> "$GITHUB_OUTPUT"
           else
-            echo "No changelog found, using tag message"
-            {
-              echo "body<<CHANGELOG_EOF"
-              echo "${GITHUB_REF_NAME}"
-              echo "CHANGELOG_EOF"
-            } >> "$GITHUB_OUTPUT"
+            echo "No changelog found, using default"
+            echo "body<<CHANGELOG_EOF" >> "$GITHUB_OUTPUT"
+            echo "Release ${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+            echo "CHANGELOG_EOF" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Create GitHub Release
