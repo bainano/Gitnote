@@ -39,7 +39,9 @@ jobs:
           name: windows-builds
           path: |
             release/*.exe
+            release/*.blockmap
             release/*.nsis.zip
+            release/*.yml
           if-no-files-found: error
 
   build-macos:
@@ -72,7 +74,9 @@ jobs:
           name: macos-builds
           path: |
             release/*.dmg
+            release/*.blockmap
             release/*.zip
+            release/*.yml
           if-no-files-found: error
 
   release:
@@ -88,29 +92,36 @@ jobs:
           path: artifacts
           merge-multiple: true
 
-      - name: List artifacts
+      - name: List all artifacts
         run: ls -la artifacts/
 
-      - name: Extract changelog
+      - name: Read changelog
         id: changelog
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           FILE="changelogs/v${VERSION}.md"
+          echo "Looking for changelog: $FILE"
           if [ -f "$FILE" ]; then
-            cp "$FILE" /tmp/release_body.md
-            echo "Found changelog: $FILE"
+            echo "Found changelog file"
+            CONTENT=$(cat "$FILE")
+            {
+              echo "body<<CHANGELOG_EOF"
+              echo "$CONTENT"
+              echo "CHANGELOG_EOF"
+            } >> "$GITHUB_OUTPUT"
           else
-            echo "No changelog file found at $FILE, using default"
-            echo "## Gitnote ${GITHUB_REF_NAME}" > /tmp/release_body.md
-            echo "" >> /tmp/release_body.md
-            echo "See [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/changelogs/v${VERSION}.md) for details." >> /tmp/release_body.md
+            echo "No changelog found, using tag message"
+            {
+              echo "body<<CHANGELOG_EOF"
+              echo "${GITHUB_REF_NAME}"
+              echo "CHANGELOG_EOF"
+            } >> "$GITHUB_OUTPUT"
           fi
-          echo "body_file=/tmp/release_body.md" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          body_path: ${{ steps.changelog.outputs.body_file }}
+          body: ${{ steps.changelog.outputs.body }}
           draft: false
           prerelease: false
           files: artifacts/*
